@@ -12,6 +12,7 @@ import configparser
 import pystray
 from PIL import Image
 import os
+import socket
 
 # 创建总日志文件夹
 log_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
@@ -161,9 +162,10 @@ def main():
             continue
 
         # 检查是否锁屏
-        if is_screen_locked():
-            time.sleep(1)
-            continue
+        # if is_screen_locked():
+        #     time.sleep(1)
+        #     continue
+        
         # 执行人脸检测
         result = detect_face()
 
@@ -346,6 +348,14 @@ class SettingsWindow(tk.Tk):
         except Exception as e:
             log(f"托盘菜单更新失败: {e}")
 
+# 尝试创建一个本地套接字
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('127.0.0.1', 9999))  # 绑定一个特定的端口
+except OSError:
+    print("程序已经在运行中，退出当前实例。")
+    sys.exit(1)
+
 if __name__ == "__main__":
     log("程序启动")
     # 初始化会话处理程序
@@ -376,3 +386,5 @@ if __name__ == "__main__":
         log("消息循环已退出")
     except Exception as e:
         log(f"退出消息循环时出错: {e}")
+    # 关闭套接字
+    s.close()
